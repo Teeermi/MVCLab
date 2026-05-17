@@ -29,6 +29,7 @@ Aplikacja umozliwia zarzadzanie lista zadan domowych. Kazde zadanie posiada opis
   - Priorytet (Niski, Sredni, Wysoki) z kolorowym oznaczeniem
 - **Ostylowane widoki** z wykorzystaniem Bootstrap 5
 - **Filtrowanie zadan** po statusie i kategorii
+- **Konfiguracja Docker** - uruchomienie aplikacji w kontenerze
 
 ## Struktura projektu
 
@@ -47,16 +48,36 @@ projekt/
 │   └── style.css       # Dodatkowe style CSS
 ├── data.json           # Plik z danymi
 ├── requirements.txt    # Zaleznosci Python
+├── Dockerfile          # Konfiguracja obrazu Docker
+├── docker-compose.yml  # Konfiguracja Docker Compose
 └── README.md           # Dokumentacja
 ```
 
 ## Instrukcja uruchomienia
 
-### Wymagania
+### Uruchomienie z Docker (zalecane)
+
+Wymagania: Docker i Docker Compose
+
+```bash
+cd projekt
+docker-compose up --build
+```
+
+Aplikacja dostepna pod adresem: http://localhost:5000
+
+Zatrzymanie:
+```bash
+docker-compose down
+```
+
+### Uruchomienie bez Docker
+
+#### Wymagania
 - Python 3.8 lub nowszy
 - pip (menedzer pakietow Python)
 
-### Instalacja
+#### Instalacja
 
 1. Przejdz do folderu projektu:
 ```bash

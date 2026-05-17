@@ -1,0 +1,44 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "opis": "Zrobic zakupy na weekend",
+      "termin_wykonania": "2025-05-20",
+      "status": "do_zrobienia",
+      "category_id": 3,
+      "priority_id": 2
+    },
+    {
+      "id": 2,
+      "opis": "Wyniesc smieci",
+      "termin_wykonania": "2025-05-18",
+      "status": "w_trakcie",
+      "category_id": 1,
+      "priority_id": 3
+    },
+    {
+      "id": 3,
+      "opis": "Przygotowac prezentacje na spotkanie",
+      "termin_wykonania": "2025-05-22",
+      "status": "do_zrobienia",
+      "category_id": 2,
+      "priority_id": 3
+    },
+    {
+      "id": 4,
+      "opis": "Umowic sie do lekarza",
+      "termin_wykonania": "2025-05-25",
+      "status": "zakonczone",
+      "category_id": 4,
+      "priority_id": 1
+    },
+    {
+      "id": 5,
+      "opis": "Pozmywac naczynia",
+      "termin_wykonania": "2025-05-17",
+      "status": "zakonczone",
+      "category_id": 1,
+      "priority_id": 1
+    }
+  ]
+}

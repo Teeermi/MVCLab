@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista zadan{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Lista zadan</h2>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('add') }}" class="btn btn-success">Dodaj nowe zadanie</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Filtruj po statusie</label>
+                <select name="status" class="form-select">
+                    <option value="">Wszystkie</option>
+                    <option value="do_zrobienia" {% if current_status == 'do_zrobienia' %}selected{% endif %}>Do zrobienia</option>
+                    <option value="w_trakcie" {% if current_status == 'w_trakcie' %}selected{% endif %}>W trakcie</option>
+                    <option value="zakonczone" {% if current_status == 'zakonczone' %}selected{% endif %}>Zakonczone</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Filtruj po kategorii</label>
+                <select name="category" class="form-select">
+                    <option value="">Wszystkie</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if current_category == cat.id|string %}selected{% endif %}>{{ cat.nazwa }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filtruj</button>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Wyczysc</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if tasks %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Opis</th>
+                <th>Termin</th>
+                <th>Status</th>
+                <th>Kategoria</th>
+                <th>Priorytet</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>{{ task.id }}</td>
+                <td>{{ task.opis }}</td>
+                <td>{{ task.termin_wykonania }}</td>
+                <td>
+                    {% if task.status == 'do_zrobienia' %}
+                    <span class="badge bg-secondary">Do zrobienia</span>
+                    {% elif task.status == 'w_trakcie' %}
+                    <span class="badge bg-warning text-dark">W trakcie</span>
+                    {% else %}
+                    <span class="badge bg-success">Zakonczone</span>
+                    {% endif %}
+                </td>
+                <td>{{ task.category.nazwa if task.category else '-' }}</td>
+                <td>
+                    {% if task.priority %}
+                    <span class="badge" style="background-color: {{ task.priority.kolor }}">{{ task.priority.nazwa }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('view', task_id=task.id) }}" class="btn btn-sm btn-info">Szczegoly</a>
+                    <a href="{{ url_for('edit', task_id=task.id) }}" class="btn btn-sm btn-warning">Edytuj</a>
+                    <a href="{{ url_for('delete', task_id=task.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Czy na pewno usunac?')">Usun</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    Brak zadan do wyswietlenia. <a href="{{ url_for('add') }}">Dodaj nowe zadanie</a>.
+</div>
+{% endif %}
+{% endblock %}

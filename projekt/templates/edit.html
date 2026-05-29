@@ -7,23 +7,28 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <div class="mb-3">
                 <label for="opis" class="form-label">Opis zadania</label>
-                <textarea name="opis" id="opis" class="form-control" rows="3" required>{{ task.opis }}</textarea>
+                <textarea name="opis" id="opis" class="form-control {% if errors.opis %}is-invalid{% endif %}" rows="3" required minlength="3" maxlength="500">{{ form.opis }}</textarea>
+                <div class="form-text">3-500 znakow</div>
+                {% if errors.opis %}<div class="invalid-feedback">{{ errors.opis }}</div>{% endif %}
             </div>
 
             <div class="mb-3">
                 <label for="termin_wykonania" class="form-label">Termin wykonania</label>
-                <input type="date" name="termin_wykonania" id="termin_wykonania" class="form-control" value="{{ task.termin_wykonania }}" required>
+                <input type="date" name="termin_wykonania" id="termin_wykonania" class="form-control {% if errors.termin_wykonania %}is-invalid{% endif %}" value="{{ form.termin_wykonania }}" required>
+                {% if errors.termin_wykonania %}<div class="invalid-feedback">{{ errors.termin_wykonania }}</div>{% endif %}
             </div>
 
             <div class="mb-3">
                 <label for="status" class="form-label">Status</label>
                 <select name="status" id="status" class="form-select">
-                    <option value="do_zrobienia" {% if task.status == 'do_zrobienia' %}selected{% endif %}>Do zrobienia</option>
-                    <option value="w_trakcie" {% if task.status == 'w_trakcie' %}selected{% endif %}>W trakcie</option>
-                    <option value="zakonczone" {% if task.status == 'zakonczone' %}selected{% endif %}>Zakonczone</option>
+                    <option value="do_zrobienia" {% if form.status == 'do_zrobienia' %}selected{% endif %}>Do zrobienia</option>
+                    <option value="w_trakcie" {% if form.status == 'w_trakcie' %}selected{% endif %}>W trakcie</option>
+                    <option value="zakonczone" {% if form.status == 'zakonczone' %}selected{% endif %}>Zakonczone</option>
                 </select>
             </div>
 
@@ -31,7 +36,7 @@
                 <label for="category_id" class="form-label">Kategoria</label>
                 <select name="category_id" id="category_id" class="form-select">
                     {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if task.category_id == cat.id %}selected{% endif %}>{{ cat.nazwa }}</option>
+                    <option value="{{ cat.id }}" {% if form.category_id|string == cat.id|string %}selected{% endif %}>{{ cat.nazwa }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -40,14 +45,14 @@
                 <label for="priority_id" class="form-label">Priorytet</label>
                 <select name="priority_id" id="priority_id" class="form-select">
                     {% for p in priorities %}
-                    <option value="{{ p.id }}" {% if task.priority_id == p.id %}selected{% endif %}>{{ p.nazwa }}</option>
+                    <option value="{{ p.id }}" {% if form.priority_id|string == p.id|string %}selected{% endif %}>{{ p.nazwa }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
-                <a href="{{ url_for('index') }}" class="btn btn-secondary">Anuluj</a>
+                <a href="{{ url_for('view', task_id=task.id) }}" class="btn btn-secondary">Anuluj</a>
             </div>
         </form>
     </div>

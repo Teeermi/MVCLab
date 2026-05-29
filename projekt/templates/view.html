@@ -7,7 +7,7 @@
 
 <div class="card">
     <div class="card-body">
-        <dl class="row">
+        <dl class="row mb-0">
             <dt class="col-sm-3">ID</dt>
             <dd class="col-sm-9">{{ task.id }}</dd>
 
@@ -15,7 +15,12 @@
             <dd class="col-sm-9">{{ task.opis }}</dd>
 
             <dt class="col-sm-3">Termin wykonania</dt>
-            <dd class="col-sm-9">{{ task.termin_wykonania }}</dd>
+            <dd class="col-sm-9">
+                {{ task.termin_wykonania }}
+                {% if holiday %}
+                <span class="badge bg-danger ms-2">Swieto: {{ holiday }}</span>
+                {% endif %}
+            </dd>
 
             <dt class="col-sm-3">Status</dt>
             <dd class="col-sm-9">
@@ -40,8 +45,13 @@
         </dl>
     </div>
     <div class="card-footer">
+        {% if current_user %}
         <a href="{{ url_for('edit', task_id=task.id) }}" class="btn btn-warning">Edytuj</a>
-        <a href="{{ url_for('delete', task_id=task.id) }}" class="btn btn-danger" onclick="return confirm('Czy na pewno usunac?')">Usun</a>
+        <form method="POST" action="{{ url_for('delete', task_id=task.id) }}" class="d-inline" onsubmit="return confirm('Usunac zadanie?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger">Usun</button>
+        </form>
+        {% endif %}
         <a href="{{ url_for('index') }}" class="btn btn-secondary">Powrot do listy</a>
     </div>
 </div>

@@ -8,15 +8,30 @@
         <h2>Lista zadan</h2>
     </div>
     <div class="col-auto">
+        {% if current_user %}
         <a href="{{ url_for('add') }}" class="btn btn-success">Dodaj nowe zadanie</a>
+        {% endif %}
     </div>
 </div>
+
+{% if holidays %}
+<div class="alert alert-info">
+    <strong>Najblizsze swieta:</strong>
+    {% for h in holidays %}
+        {{ h.date }} - {{ h.name }}{% if not loop.last %}, {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
 
 <div class="card mb-4">
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">Filtruj po statusie</label>
+                <label class="form-label">Szukaj</label>
+                <input type="text" name="q" value="{{ current_search }}" class="form-control" maxlength="500" placeholder="szukaj w opisie">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="">Wszystkie</option>
                     <option value="do_zrobienia" {% if current_status == 'do_zrobienia' %}selected{% endif %}>Do zrobienia</option>
@@ -24,8 +39,8 @@
                     <option value="zakonczone" {% if current_status == 'zakonczone' %}selected{% endif %}>Zakonczone</option>
                 </select>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Filtruj po kategorii</label>
+            <div class="col-md-3">
+                <label class="form-label">Kategoria</label>
                 <select name="category" class="form-select">
                     <option value="">Wszystkie</option>
                     {% for cat in categories %}
@@ -33,7 +48,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4 d-flex align-items-end">
+            <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary me-2">Filtruj</button>
                 <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Wyczysc</a>
             </div>
@@ -76,10 +91,15 @@
                     <span class="badge" style="background-color: {{ task.priority.kolor }}">{{ task.priority.nazwa }}</span>
                     {% endif %}
                 </td>
-                <td>
+                <td class="text-nowrap">
                     <a href="{{ url_for('view', task_id=task.id) }}" class="btn btn-sm btn-info">Szczegoly</a>
+                    {% if current_user %}
                     <a href="{{ url_for('edit', task_id=task.id) }}" class="btn btn-sm btn-warning">Edytuj</a>
-                    <a href="{{ url_for('delete', task_id=task.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Czy na pewno usunac?')">Usun</a>
+                    <form method="POST" action="{{ url_for('delete', task_id=task.id) }}" class="d-inline" onsubmit="return confirm('Usunac zadanie?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger">Usun</button>
+                    </form>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -88,7 +108,7 @@
 </div>
 {% else %}
 <div class="alert alert-info">
-    Brak zadan do wyswietlenia. <a href="{{ url_for('add') }}">Dodaj nowe zadanie</a>.
+    Brak zadan do wyswietlenia.
 </div>
 {% endif %}
 {% endblock %}

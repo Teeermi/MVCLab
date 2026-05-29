@@ -1,136 +1,133 @@
 # System zarzadzania zadaniami domowymi
 
-Aplikacja webowa do zarzadzania zadaniami domowymi zbudowana w oparciu o wzorzec architektoniczny MVC z wykorzystaniem frameworka Flask.
+Aplikacja webowa do zarzadzania zadaniami domowymi (Zadanie 4 z listy projektowej). Napisana w Pythonie w oparciu o Flask, zgodnie ze wzorcem MVC.
 
 ## Spis tresci
 
-- [Opis projektu](#opis-projektu)
+- [Opis](#opis)
 - [Funkcjonalnosci](#funkcjonalnosci)
-- [Struktura projektu](#struktura-projektu)
 - [Instrukcja uruchomienia](#instrukcja-uruchomienia)
-- [Uzytkowanie](#uzytkowanie)
+- [Logowanie](#logowanie)
+- [Testy](#testy)
+- [Struktura projektu](#struktura-projektu)
+- [Technologie](#technologie)
 
-## Opis projektu
+## Opis
 
-Aplikacja umozliwia zarzadzanie lista zadan domowych. Kazde zadanie posiada opis, termin wykonania, status oraz przypisana kategorie i priorytet. System pozwala na dodawanie, edycje, usuwanie oraz przegladanie zadan z mozliwoscia filtrowania.
+Aplikacja pozwala dodawac, edytowac, usuwac i przegladac zadania domowe. Kazde zadanie ma opis, termin wykonania, status, kategorie i priorytet. Mozna filtrowac liste po statusie i kategorii oraz szukac po tresci opisu.
+
+Dane sa zapisywane w pliku `data.json`, konta uzytkownikow w `users.json` (hasla hashowane).
 
 ## Funkcjonalnosci
 
-### Podstawowe (CRUD)
-- Wyswietlanie listy wszystkich zadan
-- Dodawanie nowych zadan
-- Edycja istniejacych zadan
-- Usuwanie zadan
-- Podglad szczegolowy zadania
+Podstawowe (CRUD):
+- lista wszystkich zadan
+- dodawanie nowego zadania
+- edycja istniejacego zadania
+- usuwanie zadania
+- widok szczegolow zadania
 
-### Dodatkowe
-- **Dwa dodatkowe modele z relacjami:**
-  - Kategoria (Dom, Praca, Zakupy, Zdrowie, Inne)
-  - Priorytet (Niski, Sredni, Wysoki) z kolorowym oznaczeniem
-- **Ostylowane widoki** z wykorzystaniem Bootstrap 5
-- **Filtrowanie zadan** po statusie i kategorii
-- **Konfiguracja Docker** - uruchomienie aplikacji w kontenerze
+Dodatkowo:
+- dwa dodatkowe modele (Kategoria i Priorytet) powiazane z zadaniem
+- ostylowanie Bootstrap 5 + wlasny CSS
+- filtrowanie po statusie i kategorii + wyszukiwanie po opisie
+- walidacja danych po stronie serwera (validators.py) i klienta (validation.js)
+- logowanie i sesja uzytkownika (do dodawania/edycji/usuwania trzeba byc zalogowanym)
+- ochrona CSRF (Flask-WTF) i usuwanie tylko przez POST
+- integracja z zewnetrznym API (Nager.Date) - lista polskich swiat panstwowych pokazywana na liscie oraz oznaczenie czy termin zadania wypada w dzien swiateczny
+- testy jednostkowe pytest
+- konfiguracja Docker (gunicorn)
+
+## Instrukcja uruchomienia
+
+### Docker (zalecane)
+
+```bash
+cd projekt
+docker compose up --build
+```
+
+Aplikacja: http://localhost:5000
+
+Zatrzymanie:
+```bash
+docker compose down
+```
+
+### Lokalnie
+
+Wymagania: Python 3.8+ i pip.
+
+```bash
+cd projekt
+python -m venv venv
+source venv/bin/activate          # Linux/Mac
+# venv\Scripts\activate           # Windows
+pip install -r requirements.txt
+python app.py
+```
+
+Tryb deweloperski z autoreloadem:
+```bash
+FLASK_DEBUG=1 python app.py
+```
+
+## Logowanie
+
+Konto demonstracyjne:
+- login: `admin`
+- haslo: `admin123`
+
+Bez logowania mozna tylko przegladac liste i szczegoly zadan.
+
+## Testy
+
+```bash
+cd projekt
+pip install -r requirements.txt
+pytest
+```
+
+Testy uzywaja tymczasowych plikow JSON, nie modyfikuja produkcyjnego `data.json`.
 
 ## Struktura projektu
 
 ```
 projekt/
-├── app.py              # Glowna aplikacja Flask
-├── models.py           # Definicje modeli (Task, Category, Priority)
-├── controllers.py      # Kontrolery obslugi zadan HTTP
-├── templates/          # Szablony HTML (widoki)
-│   ├── base.html       # Szablon bazowy
-│   ├── index.html      # Lista zadan
-│   ├── add.html        # Formularz dodawania
-│   ├── edit.html       # Formularz edycji
-│   └── view.html       # Szczegoly zadania
+├── app.py              # Flask app, routing, CSRF
+├── controllers.py      # Kontrolery (obsluga zadan HTTP)
+├── models.py           # Modele: Task, Category, Priority, User
+├── validators.py       # Walidacja danych formularza
+├── services.py         # Integracja z API swiat panstwowych
+├── auth.py             # Dekorator login_required
+├── data.json           # Przykladowe zadania
+├── users.json          # Konta uzytkownikow (hasla hashowane)
+├── requirements.txt
+├── pytest.ini
+├── Dockerfile
+├── docker-compose.yml
+├── templates/          # Szablony Jinja2
+│   ├── base.html
+│   ├── index.html
+│   ├── add.html
+│   ├── edit.html
+│   ├── view.html
+│   └── login.html
 ├── static/
-│   └── style.css       # Dodatkowe style CSS
-├── data.json           # Plik z danymi
-├── requirements.txt    # Zaleznosci Python
-├── Dockerfile          # Konfiguracja obrazu Docker
-├── docker-compose.yml  # Konfiguracja Docker Compose
-└── README.md           # Dokumentacja
+│   ├── style.css
+│   └── validation.js
+└── tests/
+    ├── conftest.py
+    ├── test_models.py
+    ├── test_validators.py
+    └── test_controllers.py
 ```
-
-## Instrukcja uruchomienia
-
-### Uruchomienie z Docker (zalecane)
-
-Wymagania: Docker i Docker Compose
-
-```bash
-cd projekt
-docker-compose up --build
-```
-
-Aplikacja dostepna pod adresem: http://localhost:5000
-
-Zatrzymanie:
-```bash
-docker-compose down
-```
-
-### Uruchomienie bez Docker
-
-#### Wymagania
-- Python 3.8 lub nowszy
-- pip (menedzer pakietow Python)
-
-#### Instalacja
-
-1. Przejdz do folderu projektu:
-```bash
-cd projekt
-```
-
-2. Utworz srodowisko wirtualne (opcjonalnie):
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-```
-
-3. Zainstaluj zaleznosci:
-```bash
-pip install -r requirements.txt
-```
-
-4. Uruchom aplikacje:
-```bash
-python app.py
-```
-
-5. Otworz przegladarke i przejdz pod adres:
-```
-http://localhost:5000
-```
-
-## Uzytkowanie
-
-### Lista zadan
-Na stronie glownej wyswietlana jest tabela ze wszystkimi zadaniami. Mozna filtrowac zadania po statusie (Do zrobienia, W trakcie, Zakonczone) oraz po kategorii.
-
-### Dodawanie zadania
-Kliknij przycisk "Dodaj nowe zadanie" i wypelnij formularz:
-- Opis zadania
-- Termin wykonania
-- Status
-- Kategoria
-- Priorytet
-
-### Edycja zadania
-Przy kazdym zadaniu w tabeli znajduje sie przycisk "Edytuj", ktory pozwala zmodyfikowac dane zadania.
-
-### Usuwanie zadania
-Przycisk "Usun" pozwala trwale usunac zadanie z listy.
-
-### Szczegoly zadania
-Przycisk "Szczegoly" wyswietla pelne informacje o wybranym zadaniu.
 
 ## Technologie
 
-- **Flask** - mikro-framework webowy dla Python
-- **Jinja2** - silnik szablonow
-- **Bootstrap 5** - framework CSS
-- **JSON** - format przechowywania danych
+- Flask 3.0
+- Flask-WTF (CSRF)
+- Bootstrap 5
+- requests (do zewnetrznego API)
+- gunicorn (serwer produkcyjny w Dockerze)
+- pytest

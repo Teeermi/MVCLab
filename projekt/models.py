@@ -1,8 +1,14 @@
+import hashlib
 import json
 import os
-from datetime import datetime
 
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'data.json')
+
+def data_path():
+    return os.environ.get('DATA_FILE', os.path.join(os.path.dirname(__file__), 'data.json'))
+
+
+def users_path():
+    return os.environ.get('USERS_FILE', os.path.join(os.path.dirname(__file__), 'users.json'))
 
 
 class Priority:
@@ -85,18 +91,19 @@ class Task:
 
     @staticmethod
     def _load_data():
-        if os.path.exists(DATA_FILE):
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
+        path = data_path()
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         return {'tasks': []}
 
     @staticmethod
     def _save_data(data):
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+        with open(data_path(), 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
     @staticmethod
-    def get_all(status_filter=None, category_filter=None):
+    def get_all(status_filter=None, category_filter=None, search=None):
         data = Task._load_data()
         tasks = []
         for t in data['tasks']:
@@ -105,6 +112,8 @@ class Task:
             if status_filter and task.status != status_filter:
                 continue
             if category_filter and task.category_id != int(category_filter):
+                continue
+            if search and search.lower() not in task.opis.lower():
                 continue
             tasks.append(task)
         return tasks
@@ -144,5 +153,38 @@ class Task:
     @staticmethod
     def delete(task_id):
         data = Task._load_data()
+        before = len(data['tasks'])
         data['tasks'] = [t for t in data['tasks'] if t['id'] != task_id]
+        if len(data['tasks']) == before:
+            return False
         Task._save_data(data)
+        return True
+
+
+class User:
+    def __init__(self, username, password_hash):
+        self.username = username
+        self.password_hash = password_hash
+
+    @staticmethod
+    def hash_password(password):
+        return hashlib.sha256(('mvclab' + password).encode('utf-8')).hexdigest()
+
+    @staticmethod
+    def get_by_username(username):
+        path = users_path()
+        if not os.path.exists(path):
+            return None
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        for u in data['users']:
+            if u['username'] == username:
+                return User(u['username'], u['password_hash'])
+        return None
+
+    @staticmethod
+    def authenticate(username, password):
+        user = User.get_by_username(username)
+        if user and user.password_hash == User.hash_password(password):
+            return user
+        return None
